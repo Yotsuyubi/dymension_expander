@@ -30,6 +30,19 @@ pub struct DymensionExpanderParameter {
 }
 
 impl DymensionExpanderParameter {
+    pub fn new() -> Self {
+        const NUM_PARAMS: usize = 4;
+        let params = ParameterTransfer::new(NUM_PARAMS);
+        params.set_parameter(0, 1.0);
+        params.set_parameter(1, 0.0);
+        params.set_parameter(2, helpers::normalize(30e-3, 1.0, 1e-3));
+        params.set_parameter(3, helpers::normalize(120e-3, 3.0, 20e-3));
+        Self {
+            num_parameters: NUM_PARAMS as i32,
+            transfer: params,
+        }
+    }
+
     pub fn get_denormalized_parameter(&self, index: i32) -> f32 {
         let param = Params::from_i32(index);
         let value = self.transfer.get_parameter(index as usize);
@@ -110,18 +123,5 @@ impl PluginParameters for DymensionExpanderParameter {
 
     fn set_parameter(&self, index: i32, value: f32) {
         self.transfer.set_parameter(index as usize, value)
-    }
-}
-
-pub fn parameters_factory() -> DymensionExpanderParameter {
-    const NUM_PARAMS: usize = 4;
-    let params = ParameterTransfer::new(NUM_PARAMS);
-    params.set_parameter(0, 1.0);
-    params.set_parameter(1, 0.0);
-    params.set_parameter(2, helpers::normalize(30e-3, 1.0, 1e-3));
-    params.set_parameter(3, helpers::normalize(120e-3, 3.0, 20e-3));
-    DymensionExpanderParameter {
-        num_parameters: NUM_PARAMS as i32,
-        transfer: params,
     }
 }

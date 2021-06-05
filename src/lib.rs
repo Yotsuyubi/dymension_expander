@@ -66,7 +66,7 @@ impl DymensionExpander {
 
 impl Plugin for DymensionExpander {
     fn new(host: HostCallback) -> Self {
-        let params = Arc::new(parameters::parameters_factory());
+        let params = Arc::new(parameters::DymensionExpanderParameter::new());
         let gui = DymensionExpanderGUI::new(Arc::clone(&params), host);
         let rample_rate = 44100.0;
 
