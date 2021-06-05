@@ -1,0 +1,17 @@
+[package]
+name = "dymension-expander"
+version = "0.1.0"
+authors = ["Psykhedelic_Mandala"]
+edition = "2018"
+
+[dependencies]
+vst = { git = "https://github.com/RustAudio/vst-rs.git", rev = "a398697b" }
+vst-gui = { git = "https://github.com/Yotsuyubi/rust-vst-gui.git", rev = "72a3b4f" }
+num = "0.4"
+num-derive = "0.3"
+num-traits = "0.2"
+time = "0.2.17"
+
+[lib]
+name = "basicvst"
+crate-type = ["cdylib"]
