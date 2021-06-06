@@ -1,8 +1,8 @@
 # Dymension Expander
-Dynamical dimension expander vst. Note: Currently, only supported on osx.
+The dynamical dimension expander vst. Note: Currently, only supported on osx.
 
 ## What's this?
-This is a gain controlled dimension expander. If you want to make the attack wider, this may be useful.
+This is the gain controlled dimension expander. If you want to make the stereo image on the attack wider, this may be useful.
 
 ## Build
 
