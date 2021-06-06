@@ -1,9 +1,11 @@
 import Vue from 'vue'
 import App from './App'
-import Element from 'element-ui'
-// import 'element-theme-chalk';
+import { Slider, Card, Header, Container } from 'element-ui'
 
-Vue.use(Element)
+Vue.component(Slider.name, Slider)
+Vue.component(Card.name, Card)
+Vue.component(Header.name, Header)
+Vue.component(Container.name, Container)
 
 new Vue({
     el: '#app',

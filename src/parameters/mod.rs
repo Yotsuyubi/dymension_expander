@@ -35,8 +35,8 @@ impl DymensionExpanderParameter {
         let params = ParameterTransfer::new(NUM_PARAMS);
         params.set_parameter(0, 1.0);
         params.set_parameter(1, 0.0);
-        params.set_parameter(2, helpers::normalize(30e-3, 1.0, 1e-3));
-        params.set_parameter(3, helpers::normalize(120e-3, 3.0, 20e-3));
+        params.set_parameter(2, helpers::normalize(30.0, 1.0e3, 1.0));
+        params.set_parameter(3, helpers::normalize(120.0, 3.0e3, 20.0));
         Self {
             num_parameters: NUM_PARAMS as i32,
             transfer: params,
@@ -52,8 +52,8 @@ impl DymensionExpanderParameter {
                 helpers::linear_to_dB(get_value)
             }
             Params::RATIO => helpers::denormalize(value, 30.0, 1.0),
-            Params::ATTACK => helpers::denormalize(value, 1.0, 1e-3),
-            Params::RELEASE => helpers::denormalize(value, 3.0, 20e-3),
+            Params::ATTACK => helpers::denormalize(value, 1.0e3, 1.0),
+            Params::RELEASE => helpers::denormalize(value, 3.0e3, 20.0),
             _ => (0.0),
         }
     }
@@ -71,11 +71,11 @@ impl DymensionExpanderParameter {
                 self.transfer.set_parameter(index as usize, ratio_value);
             }
             Params::ATTACK => {
-                let attack_value = helpers::normalize(value, 1.0, 1e-3);
+                let attack_value = helpers::normalize(value, 1.0e3, 1.0);
                 self.transfer.set_parameter(index as usize, attack_value);
             }
             Params::RELEASE => {
-                let release_value = helpers::normalize(value, 3.0, 20e-3);
+                let release_value = helpers::normalize(value, 3.0e3, 20.0);
                 self.transfer.set_parameter(index as usize, release_value);
             }
             _ => (),
@@ -111,8 +111,8 @@ impl PluginParameters for DymensionExpanderParameter {
         match param {
             Params::TH => format!("{:.1}", self.get_denormalized_parameter(index)),
             Params::RATIO => format!("{:.1}", self.get_denormalized_parameter(index)),
-            Params::ATTACK => format!("{:.0}", self.get_denormalized_parameter(index) * 1000.0),
-            Params::RELEASE => format!("{:.0}", self.get_denormalized_parameter(index) * 1000.0),
+            Params::ATTACK => format!("{:.0}", self.get_denormalized_parameter(index)),
+            Params::RELEASE => format!("{:.0}", self.get_denormalized_parameter(index)),
             _ => "".to_string(),
         }
     }

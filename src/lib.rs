@@ -121,8 +121,8 @@ impl Plugin for DymensionExpander {
     fn process(&mut self, buffer: &mut AudioBuffer<f32>) {
         let threshold = self.params.get_denormalized_parameter(0);
         let ratio = self.params.get_denormalized_parameter(1);
-        let attack = self.params.get_denormalized_parameter(2);
-        let release = self.params.get_denormalized_parameter(3);
+        let attack = self.params.get_denormalized_parameter(2) * 1e-3;
+        let release = self.params.get_denormalized_parameter(3) * 1e-3;
         let size = self.size;
 
         self.gain_dynamics.set_attack(attack);
@@ -200,14 +200,14 @@ impl Plugin for DymensionExpander {
         }
     }
 
-    // fn get_editor(&mut self) -> Option<Box<dyn Editor>> {
-    //     let gui = vst_gui::new_plugin_gui(
-    //         String::from(self.gui.get_html()),
-    //         self.gui.javascript_callback(),
-    //         Some((500, 500)),
-    //     );
-    //     Some(Box::new(gui))
-    // }
+    fn get_editor(&mut self) -> Option<Box<dyn Editor>> {
+        let gui = vst_gui::new_plugin_gui(
+            String::from(self.gui.get_html()),
+            self.gui.javascript_callback(),
+            Some((500, 500)),
+        );
+        Some(Box::new(gui))
+    }
 }
 
 plugin_main!(DymensionExpander);
