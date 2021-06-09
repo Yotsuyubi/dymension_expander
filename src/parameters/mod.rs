@@ -8,17 +8,30 @@ pub enum Params {
     RATIO,
     ATTACK,
     RELEASE,
+    GAINDYNAMICS,
     UNKNOWN,
 }
 
 impl Params {
-    fn from_i32(index: i32) -> Self {
+    pub fn from_i32(index: i32) -> Self {
         match index {
             0 => Self::TH,
             1 => Self::RATIO,
             2 => Self::ATTACK,
             3 => Self::RELEASE,
+            4 => Self::GAINDYNAMICS,
             _ => Self::UNKNOWN,
+        }
+    }
+
+    pub fn to_i32(param: Self) -> usize {
+        match param {
+            Self::TH => 0,
+            Self::RATIO => 1,
+            Self::ATTACK => 2,
+            Self::RELEASE => 3,
+            Self::GAINDYNAMICS => 4,
+            Self::UNKNOWN => 999,
         }
     }
 }
@@ -31,12 +44,22 @@ pub struct DymensionExpanderParameter {
 
 impl DymensionExpanderParameter {
     pub fn new() -> Self {
-        const NUM_PARAMS: usize = 4;
+        const NUM_PARAMS: usize = 5;
         let params = ParameterTransfer::new(NUM_PARAMS);
-        params.set_parameter(0, 1.0);
-        params.set_parameter(1, 0.0);
-        params.set_parameter(2, helpers::normalize(30.0, 1.0e3, 1.0));
-        params.set_parameter(3, helpers::normalize(120.0, 3.0e3, 20.0));
+        params.set_parameter(Params::to_i32(Params::TH), 1.0);
+        params.set_parameter(Params::to_i32(Params::RATIO), 0.0);
+        params.set_parameter(
+            Params::to_i32(Params::ATTACK),
+            helpers::normalize(30.0, 1.0e3, 1.0),
+        );
+        params.set_parameter(
+            Params::to_i32(Params::RELEASE),
+            helpers::normalize(120.0, 3.0e3, 20.0),
+        );
+        params.set_parameter(
+            Params::to_i32(Params::GAINDYNAMICS),
+            helpers::normalize(1.0, 1.0, 0.0001),
+        );
         Self {
             num_parameters: NUM_PARAMS as i32,
             transfer: params,
@@ -54,6 +77,10 @@ impl DymensionExpanderParameter {
             Params::RATIO => helpers::denormalize(value, 30.0, 1.0),
             Params::ATTACK => helpers::denormalize(value, 1.0e3, 1.0),
             Params::RELEASE => helpers::denormalize(value, 3.0e3, 20.0),
+            Params::GAINDYNAMICS => {
+                let get_value = helpers::denormalize(value, 1.0, 0.0001);
+                helpers::linear_to_dB(get_value)
+            }
             _ => (0.0),
         }
     }
@@ -78,7 +105,20 @@ impl DymensionExpanderParameter {
                 let release_value = helpers::normalize(value, 3.0e3, 20.0);
                 self.transfer.set_parameter(index as usize, release_value);
             }
+            Params::GAINDYNAMICS => {
+                let lin_value = helpers::dB_to_linear(value);
+                let set_value = helpers::normalize(lin_value, 1.0, 0.0001);
+                self.transfer.set_parameter(index as usize, set_value);
+            }
             _ => (),
+        }
+    }
+
+    pub fn get_indicator(&self, index: i32) -> String {
+        let param = Params::from_i32(index);
+        match param {
+            Params::GAINDYNAMICS => format!("{:.1}", self.get_denormalized_parameter(index)),
+            _ => "".to_string(),
         }
     }
 }
@@ -123,5 +163,13 @@ impl PluginParameters for DymensionExpanderParameter {
 
     fn set_parameter(&self, index: i32, value: f32) {
         self.transfer.set_parameter(index as usize, value)
+    }
+
+    fn can_be_automated(&self, index: i32) -> bool {
+        let param = Params::from_i32(index);
+        match param {
+            Params::GAINDYNAMICS => false,
+            _ => true,
+        }
     }
 }

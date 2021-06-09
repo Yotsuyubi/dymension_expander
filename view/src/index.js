@@ -1,11 +1,8 @@
 import Vue from 'vue'
 import App from './App'
-import { Slider, Card, Header, Container } from 'element-ui'
+import Element from 'element-ui'
 
-Vue.component(Slider.name, Slider)
-Vue.component(Card.name, Card)
-Vue.component(Header.name, Header)
-Vue.component(Container.name, Container)
+Vue.use(Element)
 
 new Vue({
     el: '#app',

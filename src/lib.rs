@@ -8,10 +8,10 @@ mod parameters;
 mod view;
 
 use logics::delay::delay;
-use logics::gain_dynamics::GainDynamics;
 use logics::peak_level_detector::PeakLevelDetector;
 use parameters::helpers::{dB_to_linear, linear_to_dB};
 use parameters::DymensionExpanderParameter;
+use parameters::Params;
 use view::DymensionExpanderGUI;
 
 use vst::buffer::AudioBuffer;
@@ -32,12 +32,11 @@ struct DymensionExpander {
     buffers: Vec<VecDeque<SamplePair>>,
     size: f32,
     old_size: f32,
-    gain_dynamics: GainDynamics,
     peak_level_detector: PeakLevelDetector,
 }
 
 impl DymensionExpander {
-    /// Update the delay buffers with a new size value.
+    // Update the delay buffers with a new size value.
     fn resize(&mut self, n: f32) {
         let old_size = self.old_size;
 
@@ -92,12 +91,11 @@ impl Plugin for DymensionExpander {
             buffers: buffers,
             size: 0.12,
             old_size: 0.12,
-            gain_dynamics: GainDynamics::new(
-                44100.0,
+            peak_level_detector: PeakLevelDetector::new(
+                rample_rate,
                 Arc::clone(&params).get_parameter(2),
                 Arc::clone(&params).get_parameter(3),
             ),
-            peak_level_detector: PeakLevelDetector::new(rample_rate),
         }
     }
 
@@ -125,8 +123,8 @@ impl Plugin for DymensionExpander {
         let release = self.params.get_denormalized_parameter(3) * 1e-3;
         let size = self.size;
 
-        self.gain_dynamics.set_attack(attack);
-        self.gain_dynamics.set_release(release);
+        self.peak_level_detector.set_attack(attack);
+        self.peak_level_detector.set_release(release);
 
         let (inputs, outputs) = buffer.split();
 
@@ -157,10 +155,13 @@ impl Plugin for DymensionExpander {
             let gain_dB: f32 = if peak_dB < threshold {
                 0.
             } else {
-                -(peak_dB - threshold) * (1. - 1. / ratio)
+                -(peak_dB - threshold) * 1.0 / (31.0 - ratio)
             };
 
-            let gain_dynamics = dB_to_linear(self.gain_dynamics.tick(gain_dB));
+            let dynamic_wet = 1.0 - dB_to_linear(gain_dB);
+
+            self.params
+                .set_parameter_with_normalize(Params::to_i32(Params::GAINDYNAMICS) as i32, gain_dB);
 
             // Push the new samples into the delay buffers.
             for buffer in &mut self.buffers {
@@ -184,7 +185,7 @@ impl Plugin for DymensionExpander {
                     // Sine wave volume LFO
                     let lfo = ((time_s * LFO_FREQ + offset) * PI * 2.0).sin() as f32;
 
-                    let wet = (1. - gain_dynamics) * WET_MULT;
+                    let wet = dynamic_wet * WET_MULT;
                     let mono = (left_old + right_old) / 2.0;
 
                     // Flip right channel and keep left mono so that the result is
@@ -198,6 +199,10 @@ impl Plugin for DymensionExpander {
             *left_out = *left_in + left_processed;
             *right_out = *right_in + right_processed;
         }
+    }
+
+    fn set_sample_rate(&mut self, rate: f32) {
+        self.sample_rate = rate;
     }
 
     fn get_editor(&mut self) -> Option<Box<dyn Editor>> {

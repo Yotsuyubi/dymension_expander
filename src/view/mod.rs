@@ -97,6 +97,10 @@ impl DymensionExpanderGUI {
                     host.end_edit(3);
                 }
 
+                "get-gainDynamics" => {
+                    return params.get_indicator(4);
+                }
+
                 _ => {}
             }
 

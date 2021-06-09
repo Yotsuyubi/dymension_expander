@@ -10,8 +10,7 @@
       :height="height"
       :ref="name"
       class="slider"
-    >
-    </el-slider>
+    />
   </el-card>
 </template>
 

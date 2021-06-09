@@ -5,7 +5,7 @@ pub fn dB_to_linear(dB: f32) -> f32 {
 
 #[allow(non_snake_case)]
 pub fn linear_to_dB(linear: f32) -> f32 {
-    20. * (linear).log10()
+    20. * (linear + 1e-30).log10()
 }
 
 pub fn normalize(value: f32, max: f32, min: f32) -> f32 {

@@ -5,3 +5,4 @@ view/node_modules
 .DS_Store
 view/dest/bundle.js
 src/view/bundle.js
+*.zip
